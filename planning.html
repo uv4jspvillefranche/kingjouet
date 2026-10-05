@@ -344,7 +344,7 @@
     <div class="container">
         <div class="header">
             <h1>Planning des Créneaux</h1>
-            <p>Opération King Jouet 2026 🦁👑</p>
+            <p>Opération King Jouet <span id="year"></span> 🦁👑</p>
         </div>
         
         <div class="calendar-container" id="calendar-container">
@@ -575,18 +575,61 @@ jeudi 24 décembre 2026;15h30-18h;SMOLAREK Cindy-Rose;UV2`;
             return match ? dayMap[match[1]] : null;
         }
 
+        function getDateOfFirstMondayOfLastWeekOfOctober(currentYear) {
+          // 1. On se positionne sur le 31 octobre à 23h59 ou directement sur le 31 octobre
+          const d = new Date(currentYear, 9, 31); // Le mois 9 correspond à octobre (0 = janvier, 9 = octobre)
+          
+          // 2. On récupère le jour de la semaine (0 = dimanche, 1 = lundi, ..., 6 = samedi)
+          let dayOfWeek = d.getDay();
+          
+          // 3. On calcule le décalage pour reculer jusqu'au lundi de cette semaine.
+          // Si le 31 est un lundi (1), le décalage est de 0.
+          // Si le 31 est un mardi (2), on recule de 1 jour.
+          // Si le 31 est un dimanche (0), on recule de 6 jours.
+          let shift = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
+          
+          // 4. On applique le décalage pour obtenir la date exacte du lundi
+          d.setDate(d.getDate() - shift);
+          
+          // 5. On retourne le numéro du jour du mois (ex: 27, 28, etc.)
+          return d.getDate();
+        }
+
+        function getDayIndexOfFirstdayGivenMonthAndYear(year, month) {
+          // En JavaScript, les mois vont de 0 à 11 (0 = janvier, 11 = décembre).
+          // On fait donc (month - 1) pour correspondre au paramètre classique (1 à 12).
+          const d = new Date(year, month - 1, 1);
+          
+          const jsDay = d.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
+          
+          // On décale pour que Lundi devienne 0 et Dimanche 6
+          return (jsDay + 6) % 7;
+        }
+
         // Fonction pour générer le calendrier
         function generateCalendar() {
             const data = parseCSVData(csvData);
             const container = document.getElementById('calendar-container');
             
             const months = ['octobre', 'novembre', 'décembre'];
-            const monthNames = {
-                'octobre': 'Octobre 2026',
-                'novembre': 'Novembre 2026',
-                'décembre': 'Décembre 2026'
-            };
 
+            /*
+             * CHANGE CHAQUE ANNÉE
+             */
+            // si on est en septembre ou +, on a l'année courante, sinon entre janvier et aout on a l'année de l'année d'avant
+            const currentYear = new Date().getMonth() >= 8 ? new Date().getFullYear() : new Date().getFullYear() - 1;
+
+            // Insertion de l'année dans le bandeau de titre
+            document.getElementById("year").textContent = currentYear;
+
+            /*
+             * CHANGE CHAQUE ANNÉE
+             */
+            const monthNames = {
+                'octobre': 'Octobre ' + currentYear,
+                'novembre': 'Novembre ' + currentYear,
+                'décembre': 'Décembre ' + currentYear
+            };
             
             const daysInMonth = {
                 'octobre': 31,
@@ -595,18 +638,18 @@ jeudi 24 décembre 2026;15h30-18h;SMOLAREK Cindy-Rose;UV2`;
             };
 
             /*
-             * À CHAGER CHAQUE ANNÉE, lundi = 0 - dimanche = 6
+             * CHANGE CHAQUE ANNÉE, lundi = 0 - dimanche = 6
              */
             const firstDayOfMonth = {
-                'octobre': 0, // 26 octobre 2026 est un lundi (position 0 dans le calendrier français)
-                'novembre': 6, // 1er novembre 2026 est un dimanche (position 6 dans le calendrier français)
-                'décembre': 1  // 1er décembre 2026 est un mardi (position 1 dans le calendrier français)
+                'octobre': 0, // C'est toujours un lundi (position 0 dans le calendrier français)
+                'novembre': getDayIndexOfFirstdayGivenMonthAndYear(currentYear, 11), // 1er novembre 2026 est un dimanche (position 6 dans le calendrier français)
+                'décembre': getDayIndexOfFirstdayGivenMonthAndYear(currentYear, 12)  // 1er décembre 2026 est un mardi (position 1 dans le calendrier français)
             };
             
             /*
-             * À CHAGER CHAQUE ANNÉE, date du premier lundi de la dernière semaine d'octobre
+             * CHANGE CHAQUE ANNÉE, le numéro du 1er jour du mois d'octobre à afficher (e.g. 26 en 2026 car on veut le lundi 26 octobre)
              */
-            const firstDayOfOctober = 26;
+            const firstDayOfOctober = getDateOfFirstMondayOfLastWeekOfOctober(currentYear);
             
             const dayHeaders = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
             

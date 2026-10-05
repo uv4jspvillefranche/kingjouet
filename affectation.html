@@ -353,7 +353,7 @@
     <div class="container">
         <div class="header">
             <h1>Tableau des Affectations</h1>
-            <p>Opération King Jouet 2026 🦁👑</p>
+            <p>Opération King Jouet <span id="year"></span> 🦁👑</p>
         </div>
         
         <div class="table-container">
@@ -637,6 +637,15 @@ jeudi 24 décembre 2026;15h30-18h;SMOLAREK Cindy-Rose;UV2`;
 
         // Fonction pour générer le tableau
         function generateTable() {
+            /*
+             * CHANGE CHAQUE ANNÉE
+             */
+            // si on est en septembre ou +, on a l'année courante, sinon entre janvier et aout on a l'année de l'année d'avant
+            const currentYear = new Date().getMonth() >= 8 ? new Date().getFullYear() : new Date().getFullYear() - 1;
+
+            // Insertion de l'année dans le bandeau de titre
+            document.getElementById("year").textContent = currentYear;
+            
             const assignments = parseCSVData(csvData);
             const assignmentsByPerson = {};
             
